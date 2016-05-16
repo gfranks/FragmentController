@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="description" content="Fragmentcontroller : ">
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>Fragmentcontroller</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/gfranks/FragmentController">View on GitHub</a>
+
+          <h1 id="project_title">Fragmentcontroller</h1>
+          <h2 id="project_tagline"></h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/gfranks/FragmentController/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/gfranks/FragmentController/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <h1>
+<a id="fragmentcontroller" class="anchor" href="#fragmentcontroller" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>FragmentController</h1>
+
+<p>This is an Fragment controller for handling toggling between fragments on a given activity/screen using the LocalBroadcastManager. FragmentController is only available for API levels 15+.</p>
+
+<h2>
+<a id="how-to-use-it" class="anchor" href="#how-to-use-it" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>How To Use It:</h2>
+
+<h3>
+<a id="basic-example" class="anchor" href="#basic-example" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Basic Example</h3>
+
+<div class="highlight highlight-source-java"><pre><span class="pl-k">public</span> <span class="pl-k">class</span> <span class="pl-en">MainFragment</span> <span class="pl-k">extends</span> <span class="pl-e">FragmentController</span> {
+
+    <span class="pl-k">private</span> <span class="pl-k">List&lt;<span class="pl-smi">String</span>&gt;</span> mTags;
+
+    <span class="pl-c">// return your list of tags defining each possible fragment being displayed</span>
+    <span class="pl-k">@NonNull</span>
+    <span class="pl-k">@Override</span>
+    <span class="pl-k">public</span> <span class="pl-k">List&lt;<span class="pl-smi">String</span>&gt;</span> <span class="pl-en">getTagsForFragments</span>() {
+        <span class="pl-k">if</span> (mTags <span class="pl-k">==</span> <span class="pl-c1">null</span>) {
+            mTags <span class="pl-k">=</span> <span class="pl-k">new</span> <span class="pl-k">ArrayList&lt;&gt;</span>();
+            mTags<span class="pl-k">.</span>add(<span class="pl-smi">FirstFragment</span><span class="pl-c1"><span class="pl-k">.</span>TAG</span>);
+            mTags<span class="pl-k">.</span>add(<span class="pl-smi">SecondFragment</span><span class="pl-c1"><span class="pl-k">.</span>TAG</span>);
+        }
+        <span class="pl-k">return</span> mTags;
+    }
+
+    <span class="pl-c">// create your arguments, if any, when first creating the initial fragment</span>
+    <span class="pl-k">@Override</span>
+    <span class="pl-k">public</span> <span class="pl-smi">Bundle</span> <span class="pl-en">getInitialArgumentsForFragment</span>(<span class="pl-smi">String</span> <span class="pl-v">tag</span>) {
+        <span class="pl-k">return</span> <span class="pl-k">new</span> <span class="pl-smi">Bundle</span>();
+    }
+
+    <span class="pl-c">// initialize the fragment yourself, in case any special constructor/method should be called</span>
+    <span class="pl-k">@NonNull</span>
+    <span class="pl-k">@Override</span>
+    <span class="pl-k">public</span> <span class="pl-smi">Fragment</span> <span class="pl-en">createFragmentFromTag</span>(<span class="pl-smi">String</span> <span class="pl-v">tag</span>, <span class="pl-smi">Bundle</span> <span class="pl-v">args</span>) {
+        <span class="pl-smi">Fragment</span> fragment;
+        <span class="pl-k">if</span> (tag<span class="pl-k">.</span>equals(<span class="pl-smi">FirstFragment</span><span class="pl-c1"><span class="pl-k">.</span>TAG</span>)) {
+            fragment <span class="pl-k">=</span> <span class="pl-k">new</span> <span class="pl-smi">FirstFragment</span>();
+        } <span class="pl-k">else</span> {
+            fragment <span class="pl-k">=</span> <span class="pl-k">new</span> <span class="pl-smi">SecondFragment</span>();
+        }
+
+        fragment<span class="pl-k">.</span>setArguments(args);
+
+        <span class="pl-k">return</span> fragment;
+    }
+}</pre></div>
+
+<h3>
+<a id="toggling-between-fragments" class="anchor" href="#toggling-between-fragments" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Toggling between Fragments</h3>
+
+<div class="highlight highlight-source-java"><pre><span class="pl-k">public</span> <span class="pl-k">class</span> <span class="pl-en">FirstFragment</span> <span class="pl-k">extends</span> <span class="pl-e">Fragment</span> {
+
+    <span class="pl-c1">...</span>
+
+    <span class="pl-c">// will toggle to the next fragment by referencing the next possble fragment tag</span>
+    <span class="pl-k">private</span> <span class="pl-k">void</span> <span class="pl-en">toggle</span>() {
+        <span class="pl-smi">LocalBroadcastManager</span><span class="pl-k">.</span>getInstance(getContext())<span class="pl-k">.</span>sendBroadcast(<span class="pl-k">new</span> <span class="pl-smi">Intent</span>(<span class="pl-smi">FragmentController</span><span class="pl-c1"><span class="pl-k">.</span>BROADCAST_TOGGLE</span>));
+    }
+}
+</pre></div>
+
+<p>Please see the sample project included in this repo for an example.</p>
+
+<h2>
+<a id="installation" class="anchor" href="#installation" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Installation:</h2>
+
+<h3>
+<a id="directly-include-source-into-your-projects" class="anchor" href="#directly-include-source-into-your-projects" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Directly include source into your projects</h3>
+
+<ul>
+<li>Simply copy the source/resource files from the library folder into your project.</li>
+</ul>
+
+<h3>
+<a id="use-binary-approach" class="anchor" href="#use-binary-approach" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Use binary approach</h3>
+
+<ul>
+<li>
+<p>Follow these steps to include aar binary in your project:</p>
+
+<p>1: Copy com.github.gfranks.fragment.controller-1.0.aar into your projects libs/ directory.</p>
+
+<p>2: Include the following either in your top level build.gradle file or your module specific one:</p>
+
+<pre><code>  repositories {
+     flatDir {
+         dirs 'libs'
+     }
+ }
+</code></pre>
+
+<p>3: Under your dependencies for your main module's build.gradle file, you can reference that aar file like so:
+<code>compile 'com.github.gfranks.fragment.controller:com.github.gfranks.fragment.controller-1.0@aar'</code></p>
+</li>
+</ul>
+
+<h2>
+<a id="license" class="anchor" href="#license" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>License</h2>
+
+<p>Copyright (c) 2015 Garrett Franks. All rights reserved.</p>
+
+<p>Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:</p>
+
+<p>The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.</p>
+
+<p>THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.</p>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">Fragmentcontroller maintained by <a href="https://github.com/gfranks">gfranks</a></p>
+        <p>Published with <a href="https://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+    
+
+  </body>
+</html>
